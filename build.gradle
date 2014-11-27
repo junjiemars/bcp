@@ -1,12 +1,56 @@
 apply plugin: 'java'
 
-sourceCompatibility = 1.5
+sourceCompatibility = 1.6
 version = '1.0'
 
 repositories {
-    mavenCentral()
+    maven {
+//        url 'http://repo2.maven.org/maven2'
+        url 'http://mirrors.ibiblio.org/pub/mirrors/maven2'
+    }
+
+//    mavenCentral()
 }
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
+    compile fileTree(dir: 'libs', include: '*.jar')
+}
+
+jar {
+    manifest {
+        attributes(
+                'Create-By': System.getProperty('java.version'),
+                'Build-By': "$System.env.USER@" + hostname(),
+                'Build-Version': jar_version(),
+                'Build-Date': new Date()
+        )
+    }
+}
+
+task uberjar(type: Jar/*,dependsOn:[':compileJava',':compileGroovy'*/) {
+    from files(sourceSets.main.output.classesDir)
+    from configurations.runtime.asFileTree.files.collect { zipTree(it) }
+
+    manifest {
+        attributes(
+                'Create-By': System.getProperty('java.version'),
+                'Main-Class': 'com.xw.push.Core',
+                'Build-Version': jar_version(),
+                'Build-Date': new Date()
+        )
+    }
+}
+
+
+String hostname() {
+    InetAddress.getLocalHost().getHostName()
+}
+
+String vcs_version() {
+    'git describe --tags --always HEAD'.execute().text.trim()
+}
+
+String jar_version() {
+    String.format('%s-%s', version, vcs_version())
 }
