@@ -16,7 +16,7 @@ subprojects {
     jar {
         manifest {
             attributes(
-                    'Create-By': System.getProperty('java.version'),
+                    'Create-By': create_by(),
                     'Build-By': "$System.env.USER@" + hostname(),
                     'Build-Version': jar_version(),
                     'Build-Date': new Date()
@@ -24,6 +24,13 @@ subprojects {
         }
     }
 
+}
+
+String create_by() {
+    String.format('%s %s',
+            System.getProperty('java.version'),
+            System.getProperty('java.vm.vendor')
+    )
 }
 
 String hostname() {
