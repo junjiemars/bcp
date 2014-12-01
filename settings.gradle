@@ -1,2 +1,3 @@
-rootProject.name = 'bcp'
+//rootProject.name = 'bcp'
+include 'bcp'
 

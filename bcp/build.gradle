@@ -1,0 +1,38 @@
+apply plugin: 'java'
+//apply plugin: 'application'
+
+sourceCompatibility = 1.6
+version = '1.0'
+
+//mainClassName = 'org.tao.svr.Server'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile 'junit:junit:4.11'
+    //compile project(':baidu.push.svr')
+    //runtime project(':baidu.push.svr')
+    compile fileTree(dir: 'libs', include: '*.jar')
+}
+
+task(run, dependsOn: jar, type: JavaExec) {
+    main = 'com.xw.push.Core'
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+
+task uberjar(type: Jar/*,dependsOn:[':compileJava',':compileGroovy'*/) {
+    from files(sourceSets.main.output.classesDir)
+    from configurations.runtime.asFileTree.files.collect { zipTree(it) }
+
+    manifest {
+        attributes(
+                'Create-By': System.getProperty('java.version'),
+                'Main-Class': 'com.xw.push.Core',
+                'Build-Version': jar_version(),
+                'Build-Date': new Date()
+        )
+    }
+}

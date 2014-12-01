@@ -12,11 +12,21 @@ import com.baidu.yun.core.log.YunLogHandler;
 import static java.lang.System.out;
 
 /**
- * Created by junjie on 11/27/14.
- */
-public final class Pusher<T> {
+ * Just one static class for pushing.
+ * @author junjiemars@mail.xwtec.cn
+  */
+public final class Pusher {
     private Pusher(){}
 
+    /**
+     * 单播推送通知
+     * @param apiKey 应用标识，终端上的绑定和服务端推送消息时都要用到
+     * @param secretKey 应用私钥，服务端推送消息时用到
+     * @param deviceType 设备类型标识
+     * @param channelId 推送通道ID，通常指一个终端，如一台android系统手机。客户端绑定调用返回值中可获得
+     * @param content 要推送的消息体内容
+     * @return 成功后返回:>0, 失败后返回:0
+     */
     public static final int push_unicast_notification(
             final String apiKey,
             final String secretKey,
