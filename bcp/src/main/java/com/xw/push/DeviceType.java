@@ -20,5 +20,24 @@ public enum DeviceType {
         return (_t);
     }
 
+    public static final DeviceType from_str(final String s, final DeviceType d) {
+        if (null == s || s.length() == 0) {
+            return (d);
+        }
+        try {
+            final DeviceType t = DeviceType.valueOf(s.toUpperCase());
+            return (t);
+        } catch (final IllegalArgumentException a) {
+//            try {
+//                final int i = Integer.parseInt(s);
+//                return (DeviceType(i));
+//            } catch (final NumberFormatException n) {
+//                //do nothing
+//            }
+        }
+
+        return (d);
+    }
+
     private final int _t;
 }
