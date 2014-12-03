@@ -7,7 +7,7 @@ package com.xw.push;
 public abstract class Logger {
     public abstract void log_channel(String e);
     public abstract void log_client_exception(final String e);
-    public abstract void log_channel_exception(
+    public abstract void log_server_exception(
             final long requestId,
             final int errorId,
             final String errorMessage);

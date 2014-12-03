@@ -7,9 +7,13 @@ package com.xw.push;
 import gnu.getopt.Getopt;
 import gnu.getopt.LongOpt;
 
+import java.nio.charset.Charset;
+
 import static java.lang.System.out;
 
 public final class Core {
+    private static final Charset UTF = Charset.forName("UTF-8");
+
     public static final void main(final String[] args) {
         if (args.length < 2) {
             _help();
@@ -25,10 +29,12 @@ public final class Core {
                 new LongOpt("channel", LongOpt.OPTIONAL_ARGUMENT, null, 'n'),
                 new LongOpt("user", LongOpt.OPTIONAL_ARGUMENT, null, 'u'),
                 new LongOpt("type", LongOpt.OPTIONAL_ARGUMENT, null, 't'),
-                new LongOpt("message", LongOpt.REQUIRED_ARGUMENT, null, 'm')
+                new LongOpt("message", LongOpt.REQUIRED_ARGUMENT, null, 'm'),
+                new LongOpt("cooked", LongOpt.OPTIONAL_ARGUMENT, null, 'k'),
+                new LongOpt("cookie", LongOpt.OPTIONAL_ARGUMENT, null, 'i')
         };
 
-        final Getopt g = new Getopt("bcp", args, "hd:c:a:s:n:u:t:m:;", opts);
+        final Getopt g = new Getopt("bcp", args, "hd:c:a:s:n:u:t:m:k:i:;", opts);
         g.setOpterr(true);
         int c;
         DeviceType device = DeviceType.ANDROID;
@@ -39,6 +45,8 @@ public final class Core {
         String user = null;
         MessageType type = MessageType.MESSAGE;
         String message = null;
+        long cooked = 0;
+        String cookie = null;
 
         while ((c = g.getopt()) != -1)
             switch (c) {
@@ -66,6 +74,12 @@ public final class Core {
                 case 'm':
                     message = g.getOptarg();
                     break;
+                case 'k':
+                    cooked = _from_str(g.getOptarg());
+                    break;
+                case 'i':
+                    cookie = g.getOptarg();
+                    break;
                 case 'h':
                     _help();
                     break;
@@ -82,9 +96,11 @@ public final class Core {
             }
 
         final Options options = new Options(device, cast, api, secret,
-                channel, user, type , message);
+                channel, user, type, message, cooked, cookie);
         out.print("REQUEST:\n=========================");
         out.println(options);
+        out.println("COOK:\n=========================");
+        final String body = _cook(options, message);
         out.println("RESPONSE:\n=========================");
 
 
@@ -96,7 +112,7 @@ public final class Core {
                     options.channel(),
                     options.user(),
                     options.type(),
-                    options.message(),
+                    body,
                     _build_logger()
             );
         } else {
@@ -105,10 +121,34 @@ public final class Core {
                     options.secret(),
                     options.device(),
                     options.type(),
-                    options.message(),
+                    body,
                     _build_logger()
             );
         }
+    }
+
+    private static final String _cook(final Options opt, final String s) {
+        if (opt.not_cooked()) {
+            return (s);
+        }
+
+        byte[] coded = null;
+        if (opt.coded()) {
+            coded = DES.encode(s, opt.cookie(), UTF);
+            out.format("\tcoded:\"%s\"->\"%s\"\n", s,
+                    new String(coded, UTF));
+        }
+
+        String zipped = null;
+        if (opt.zipped()) {
+            final byte[] z = (Utils.is_null_or_empty(coded)
+                    ? s.getBytes(UTF) : coded);
+            zipped = Gzip.zip(z, UTF);
+            out.format("\tzipped:\"%s\"->\"%s\"\n",
+                    new String(coded, UTF), zipped);
+        }
+
+        return (zipped);
     }
 
     private static final Long _from_str(final String s) {
@@ -140,7 +180,7 @@ public final class Core {
             }
 
             @Override
-            public void log_channel_exception(long requestId, int errorId, String errorMessage) {
+            public void log_server_exception(long requestId, int errorId, String errorMessage) {
                 out.format("requestId:%s errorId:%s errorMessage:%s\n",
                         requestId, errorId, errorMessage);
             }
@@ -167,7 +207,7 @@ public final class Core {
         out.println("\t--channel: channel id");
         out.println("\t--user: user id");
         out.println("\t--message: message body");
+        out.println("\t--cooked: not cooke(0), coded(1) zipped(2)");
+        out.println("\t--cookie: coded key");
     }
-
-
 }

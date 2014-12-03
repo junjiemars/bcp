@@ -55,7 +55,7 @@ public class Pushing {
             }
 
             @Override
-            public void log_channel_exception(long requestId, int errorId, String errorMessage) {
+            public void log_server_exception(long requestId, int errorId, String errorMessage) {
                 out.format("requestId:%s errorId:%s errorMessage:%s\n",
                         requestId, errorId, errorMessage);
             }

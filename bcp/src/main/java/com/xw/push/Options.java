@@ -11,7 +11,9 @@ public final class Options {
                    final Long channel,
                    final String user,
                    final MessageType type,
-                   final String message) {
+                   final String message,
+                   final long cooked,
+                   final String cookie) {
         _device = device;
         _cast = cast;
         _api = api;
@@ -20,6 +22,8 @@ public final class Options {
         _user = user;
         _type = type;
         _message = message;
+        _cooked = cooked;
+        _cookie = cookie;
     }
 
     public final DeviceType device() {
@@ -50,6 +54,24 @@ public final class Options {
         return (_message);
     }
 
+    public final boolean not_cooked() {
+        return (0L == _cooked);
+    }
+
+    public final String cookie() {
+        return (_cookie);
+    }
+
+
+    public final boolean coded() {
+        return ((1 == (_cooked & 1))
+                && (null != _cookie && _cookie.length() > 0));
+    }
+
+    public final boolean zipped() {
+        return (2 == (_cooked & 2));
+    }
+
     @Override
     public String toString() {
         final String s = String.format("\n\tdeviceType:%s" +
@@ -59,7 +81,9 @@ public final class Options {
                 "\n\tchannelId:%s" +
                 "\n\tuserId:%s" +
                 "\n\tmessageType:%s" +
-                "\n\tmessage:%s",
+                "\n\tmessage:%s" +
+                "\n\tcooked:%s" +
+                "\n\tcookie:%s",
                 String.format("%s(%s)", _device, _device.to_int()),
                 String.format("%s(%s)", _cast, _cast.to_int()),
                 _api,
@@ -67,7 +91,10 @@ public final class Options {
                 _channel,
                 _user,
                 String.format("%s(%s)", _type, _type.to_int()),
-                _message);
+                _message,
+                String.format("(%s), coded(%s) zipped(%s)",
+                        _cooked, coded(), zipped()),
+                _cookie);
         return (s);
     }
 
@@ -79,4 +106,7 @@ public final class Options {
     private final String _user;
     private final MessageType _type;
     private final String _message;
+    private final long _cooked;
+    private final String _cookie;
+
 }

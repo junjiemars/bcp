@@ -20,10 +20,10 @@ public final class Pusher {
 
     /**
      * 单播推送消息
-     * @param apiKey 应用标识，终端上的绑定和服务端推送消息时都要用到
-     * @param secretKey 应用私钥，服务端推送消息时用到
+     * @param apiKey 应用标识
+     * @param secretKey 应用私钥
      * @param deviceType 设备类型标识
-     * @param channelId 推送通道ID，通常指一个终端，如一台android系统手机。客户端绑定调用返回值中可获得
+     * @param channelId 推送通道ID
      * @param messageType 消息类型
      * @param content 要推送的消息体内容
      * @param logger 日志处理器, 可为null
@@ -37,11 +37,12 @@ public final class Pusher {
             final String userId,
             final MessageType messageType,
             final String content,
-            final Logger logger) {
+            final Logger logger/*,
+            final boolean encrypted*/) {
 
         final BaiduChannelClient client = _build_channel_client(
                 apiKey, secretKey);
-        _mount_logger(client, logger);
+        _mount_logger(logger, client);
         final PushUnicastMessageRequest request = _build_unicast_request(
                 deviceType,
                 channelId,
@@ -65,11 +66,11 @@ public final class Pusher {
 
     /**
      * 多播推送消息
-     * @param apiKey 应用标识，终端上的绑定和服务端推送消息时都要用到
-     * @param secretKey 应用私钥，服务端推送消息时用到
+     * @param apiKey 应用标识
+     * @param secretKey 应用私钥
      * @param deviceType 设备类型标识
      * @param messageType 消息类型标识
-     * @param content 要推送的消息体内容，需要按规范构建
+     * @param content 要推送的消息体内容
      * @param logger 日志处理器, 可为null
      * @return 成功后返回:>0, 失败后返回:0
      */
@@ -83,7 +84,7 @@ public final class Pusher {
 
         final BaiduChannelClient client = _build_channel_client(
                 apiKey, secretKey);
-        _mount_logger(client, logger);
+        _mount_logger(logger, client);
         final PushBroadcastMessageRequest request = _build_broadcast_request(
                 deviceType,
                 messageType,
@@ -145,8 +146,7 @@ public final class Pusher {
     }
 
     private static final void _mount_logger(
-            final BaiduChannelClient c,
-            final Logger logger) {
+            final Logger logger, final BaiduChannelClient c) {
         if (null == logger) {
             return;
         }
@@ -159,8 +159,7 @@ public final class Pusher {
     }
 
     private static final void _mount_logger(
-            final Logger logger,
-            final ChannelClientException e) {
+            final Logger logger, final ChannelClientException e) {
         if (null == logger) {
             return;
         }
@@ -169,16 +168,18 @@ public final class Pusher {
     }
 
     private static final void _mount_logger(
-            final Logger logger,
-            final ChannelServerException e) {
+            final Logger logger, final ChannelServerException e) {
         if (null == logger) {
             return;
         }
 
-        logger.log_channel_exception(e.getRequestId(),
-                e.getErrorCode(), e.getMessage());
+        logger.log_server_exception(
+                e.getRequestId(), e.getErrorCode(), e.getMessage());
     }
 
 
     private static final int RETURN_FAILED = (0);
+    private static final String UTF8 = "UTF-8";
+    private static final String UTF16 = "UTF-16";
+    private static final String DES_KEY = "dgsq1#2%";
 }
